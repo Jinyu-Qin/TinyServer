@@ -18,6 +18,11 @@ set(CMAKE_CXX_STANDARD 11)
 # CMAKE_SOURCE_DIR是CMakeLists.txt所在的目录（等价于PROJECT_SOURCE_DIR）
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
+# 设置编译宏选项
+add_definitions(
+    -D_GNU_SOURCE
+)
+
 # 设置包含的目录
 include_directories(
     ${PROJECT_SOURCE_DIR}/app/inc
