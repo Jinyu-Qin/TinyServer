@@ -1,6 +1,7 @@
 #include "Thread.h"
 #include <utility>
 #include <cstdio>
+#include <sys/prctl.h>
 #include "CurrentThread.h"
 
 static void * startThread(void * args);
@@ -28,6 +29,7 @@ private:
         latch_->countDown();
         latch_ = nullptr;
         CurrentThread::setName(name_.c_str());
+        prctl(PR_SET_NAME, CurrentThread::name());
 
         try {
             func_();
