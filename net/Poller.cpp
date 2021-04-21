@@ -24,13 +24,16 @@ EventLoop * Poller::eventLoop() const {
 }
 
 Poller::PollerPtr Poller::createDefaultPoller(EventLoop * loop) {
-    std::string poller(getenv("TINY_SERVER_POLLER"));
-    if(poller == "EPOLL") {
-        return PollerPtr(new EpollPoller(loop));
-    } else if(poller == "POLL") {
-        return PollerPtr(new PollPoller(loop));
-    } else if(poller == "SELECT") {
-        return PollerPtr(new SelectPoller(loop));
+    char * poller_name = getenv("TINY_SERVER_POLLER");
+    if(poller_name != nullptr) {
+        std::string poller(poller_name);
+        if(poller == "EPOLL") {
+            return PollerPtr(new EpollPoller(loop));
+        } else if(poller == "POLL") {
+            return PollerPtr(new PollPoller(loop));
+        } else if(poller == "SELECT") {
+            return PollerPtr(new SelectPoller(loop));
+        }
     }
     return PollerPtr(new EpollPoller(loop));
 }
