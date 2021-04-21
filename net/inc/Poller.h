@@ -5,15 +5,16 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
-#include "Channel.h"
-#include "EventLoop.h"
+
+class Channel;
+class EventLoop;
 
 class Poller: public boost::noncopyable {
 public:
     using PollerPtr = std::unique_ptr<Poller>;
 
     explicit Poller(EventLoop * loop);
-    virtual ~Poller() = 0;
+    virtual ~Poller();
 
     virtual void poll(int millisecond, std::vector<Channel *> & activeChannels) = 0;
     virtual void updateChannel(Channel * channel) = 0;

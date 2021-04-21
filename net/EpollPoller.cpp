@@ -1,5 +1,6 @@
 #include "EpollPoller.h"
 #include <stdexcept>
+#include "Channel.h"
 
 EpollPoller::EpollPoller(EventLoop * loop)
     : Poller(loop)
@@ -13,8 +14,13 @@ EpollPoller::EpollPoller(EventLoop * loop)
 EpollPoller::~EpollPoller() {
     int ret = close(epfd_);
     if(ret == -1) {
-        throw std::runtime_error("couldn't close epoll");
+        abort();
     }
+    
+    // 析构函数不应该抛出异常
+    // if(ret == -1) {
+    //     throw std::runtime_error("couldn't close epoll");
+    // }
 }
 
 void EpollPoller::poll(int millisecond, std::vector<Channel *> & activeChannels) {

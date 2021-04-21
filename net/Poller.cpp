@@ -2,9 +2,14 @@
 #include "EpollPoller.h"
 #include "PollPoller.h"
 #include "SelectPoller.h"
+#include "Channel.h"
+#include "EventLoop.h"
 
 Poller::Poller(EventLoop * loop)
     : loop_(loop) {
+}
+
+Poller::~Poller() {
 }
 
 bool Poller::hasChannel(Channel * channel) const {

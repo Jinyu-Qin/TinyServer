@@ -1,6 +1,7 @@
 #include "SelectPoller.h"
 #include <poll.h>
 #include <stdexcept>
+#include "Channel.h"
 
 SelectPoller::SelectPoller(EventLoop * loop)
     : Poller(loop)

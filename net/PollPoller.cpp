@@ -1,5 +1,6 @@
 #include "PollPoller.h"
 #include <stdexcept>
+#include "Channel.h"
 
 PollPoller::PollPoller(EventLoop * loop)
     : Poller(loop) {
@@ -39,7 +40,7 @@ void PollPoller::updateChannel(Channel * channel) {
 
         struct pollfd pfd {
             .fd = fd,
-            .events = channel->events(),
+            .events = static_cast<short>(channel->events()),
             .revents = 0
         };
         pollfds_.push_back(std::move(pfd));
