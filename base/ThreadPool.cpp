@@ -27,7 +27,7 @@ int ThreadPool::queueSize() {
 
 
 void ThreadPool::setThreadInitCallback(ThreadInitCallback callback) {
-    initCallback_ = callback;
+    initCallback_ = callback ? callback : []{};
 }
 
 

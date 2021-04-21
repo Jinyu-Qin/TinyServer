@@ -29,19 +29,19 @@ void Channel::setRevents(int revents) {
 }
 
 void Channel::setReadCallback(Callback callback) {
-    readCallback_ = callback;
+    readCallback_ = callback ? callback : []{};
 }
 
 void Channel::setWriteCallback(Callback callback) {
-    writeCallback_ = callback;
+    writeCallback_ = callback ? callback : []{};
 }
 
 void Channel::setCloseCallback(Callback callback) {
-    closeCallback_ = callback;
+    closeCallback_ = callback ? callback : []{};
 }
 
 void Channel::setErrorCallback(Callback callback) {
-    errorCallback_ = callback;
+    errorCallback_ = callback ? callback : []{};
 }
 
 void Channel::enableReading(bool enable) {
