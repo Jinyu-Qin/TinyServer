@@ -64,7 +64,7 @@ bool Channel::isWriting() const {
 
 void Channel::handleEvent() {
     if(revents_ & (POLLRDHUP | POLLHUP)) {
-        errorCallback_();
+        closeCallback_();
     }
     if(revents_ & POLLIN) {
         readCallback_();   // 正常关闭也会触发
