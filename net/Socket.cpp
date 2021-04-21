@@ -64,6 +64,7 @@ int ServerSocket::accept() {
     if(ret == -1) {
         throw std::runtime_error("couldn't accept new connection");
     }
+    return ret;
 }
 
 void ServerSocket::close() {
