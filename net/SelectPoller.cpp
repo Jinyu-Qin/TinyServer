@@ -19,22 +19,19 @@ void SelectPoller::poll(int milliseconds, std::vector<Channel *> & activeChannel
         .tv_sec = milliseconds / 1000,
         .tv_usec = milliseconds % 1000 * 1000
     };
-
-    int ret = select(maxfd_ + 1, &readfds_, &writefds_, &errorfds_, &tv);
+    fd_set readfds = readfds_;
+    fd_set writefds = writefds_;
+    fd_set errorfds = errorfds_;
+    int ret = select(maxfd_ + 1, &readfds, &writefds, &errorfds, &tv);
     if(ret == -1) {
         throw std::runtime_error("couldn't select");
     } else if(ret > 0) {
         for(int fd = 0; fd <= maxfd_; ++fd) {
             int revents = 0;
             
-            revents |= FD_ISSET(fd, &readfds_) ? POLLIN : 0;
-            FD_CLR(fd, &readfds_);
-            
-            revents |= FD_ISSET(fd, &writefds_) ? POLLOUT : 0;
-            FD_CLR(fd, &writefds_);
-            
-            revents |= FD_ISSET(fd, &errorfds_) ? POLLERR : 0;
-            FD_CLR(fd, &errorfds_);
+            revents |= FD_ISSET(fd, &readfds) ? POLLIN : 0;
+            revents |= FD_ISSET(fd, &writefds) ? POLLOUT : 0;
+            revents |= FD_ISSET(fd, &errorfds) ? POLLERR : 0;
 
             if(revents == 0) {
                 continue;
