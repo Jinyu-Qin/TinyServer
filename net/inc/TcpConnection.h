@@ -10,14 +10,16 @@
 
 class TcpConnection: public boost::noncopyable, public std::enable_shared_from_this<TcpConnection> {
     using ChannelPtr = std::unique_ptr<Channel>;
-    using BufferPtr = Buffer *;
 
 public:
+    using BufferPtr = Buffer *;
+    
     using TcpConnectionPtr = std::shared_ptr<TcpConnection>;
     using MessageReceivedCallback = std::function<void(TcpConnectionPtr, BufferPtr)>;
     using MessageSentCallback = std::function<void(TcpConnectionPtr)>;
     using CloseCallback = std::function<void(TcpConnectionPtr)>;
     using ErrorCallback = std::function<void(TcpConnectionPtr)>;
+    using CleanUpCallback = std::function<void(TcpConnectionPtr)>;
 
     ~TcpConnection();
 
@@ -25,6 +27,7 @@ public:
     void setMessageSentCallback(MessageSentCallback callback);
     void setCloseCallback(CloseCallback callback);
     void setErrorCallback(ErrorCallback callback);
+    void setCleanUpCallback(CleanUpCallback callback);
 
     bool disconnected() const;
     const std::string & name() const;
@@ -32,6 +35,8 @@ public:
     void send(const char * buf, int len);
     void send(const std::string & str);
     void shutdown();
+    void start();
+    void stop();
 
     static TcpConnectionPtr createTcpConnection(EventLoop * loop, int sockfd, const std::string & name = std::string());
 
@@ -47,6 +52,8 @@ private:
     void sendInLoop(std::shared_ptr<char> buf, int len);
 
     void shutdownInLoop();
+    void startInLoop();
+    void stopInLoop();
     
     EventLoop * loop_;
     int sockfd_;
@@ -59,6 +66,7 @@ private:
     MessageSentCallback messageSentCallback_;
     CloseCallback closeCallback_;
     ErrorCallback errorCallback_;
+    CleanUpCallback cleanUpCallback_;
 
     Buffer bufferIn_;
     Buffer bufferOut_;

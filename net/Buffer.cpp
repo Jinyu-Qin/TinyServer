@@ -57,6 +57,7 @@ int Buffer::readSeek(int offset) {
     }
 
     head_ = (head_ + offset) % capacity_;
+    size_ -= offset;
 
     return offset;
 }
@@ -67,6 +68,7 @@ int Buffer::writeSeek(int offset) {
     }
 
     tail_ = (tail_ + offset) % capacity_;
+    size_ += offset;
 
     return offset;
 }

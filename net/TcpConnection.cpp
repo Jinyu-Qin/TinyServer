@@ -13,13 +13,13 @@ TcpConnection::TcpConnection(EventLoop * loop, int sockfd, const std::string & n
     , messageSentCallback_([](TcpConnectionPtr){})
     , closeCallback_([](TcpConnectionPtr){})
     , errorCallback_([](TcpConnectionPtr){})
+    , cleanUpCallback_([](TcpConnectionPtr){})
     , bufferIn_(kBufferInCapacity_)
     , bufferOut_(kBufferOutCapacity_) {
     channel_->setReadCallback(std::bind(&TcpConnection::handleRead, this));
     channel_->setWriteCallback(std::bind(&TcpConnection::handleWrite, this));
     channel_->setCloseCallback(std::bind(&TcpConnection::handleClose, this));
     channel_->setErrorCallback(std::bind(&TcpConnection::handleError, this));
-    channel_->enableReading();
 }
 
 TcpConnection::~TcpConnection() {
@@ -42,6 +42,10 @@ void TcpConnection::setCloseCallback(CloseCallback callback) {
 
 void TcpConnection::setErrorCallback(ErrorCallback callback) {
     errorCallback_ = callback ? callback : [](TcpConnectionPtr){};
+}
+
+void TcpConnection::setCleanUpCallback(CleanUpCallback callback) {
+    cleanUpCallback_ = callback ? callback : [](TcpConnectionPtr){};
 }
 
 bool TcpConnection::disconnected() const {
@@ -72,6 +76,20 @@ void TcpConnection::shutdown() {
         return ;
     }
     loop_->queueInLoop(std::bind(&TcpConnection::shutdownInLoop, this));
+}
+
+void TcpConnection::start() {
+    if(disconnected_) {
+        return ;
+    }
+    loop_->queueInLoop(std::bind(&TcpConnection::startInLoop, this));
+}
+
+void TcpConnection::stop() {
+    if(disconnected_) {
+        return ;
+    }
+    loop_->queueInLoop(std::bind(&TcpConnection::stopInLoop, this));
 }
 
 void TcpConnection::handleRead() {
@@ -116,21 +134,27 @@ void TcpConnection::handleWrite() {
 
 void TcpConnection::handleClose() {
     disconnected_ = true;
-    channel_->enableReading(false);
+    if(channel_->isReading()) {
+        channel_->enableReading(false);
+    }
     if(channel_->isWriting()) {
         channel_->enableWriting(false);
     }
     closeCallback_(shared_from_this());
+    cleanUpCallback_(shared_from_this());
+    channel_->remove();
 }
 
 void TcpConnection::handleError() {
     errorCallback_(shared_from_this());
+    cleanUpCallback_(shared_from_this());
+    channel_->remove();
 }
 
 void TcpConnection::sendInLoop(const char * buf, int len) {
     if(disconnected_) {
         // 连接已关闭，无法发送
-        errorCallback_(shared_from_this());
+        handleError();
         return ;
     }
 
@@ -179,6 +203,20 @@ void TcpConnection::shutdownInLoop() {
     int ret = ::close(channel_->fd());
     if(ret == -1) {
         handleError();
+    } else {
+        handleClose();
+    }
+}
+
+void TcpConnection::startInLoop() {
+    if(!channel_->isReading()) {
+        channel_->enableReading(true);
+    }
+}
+
+void TcpConnection::stopInLoop() {
+    if(channel_->isReading()) {
+        channel_->enableReading(false);
     }
 }
 
