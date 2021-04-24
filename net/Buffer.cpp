@@ -97,7 +97,7 @@ int Buffer::write(const char * buf, int n) {
     int i = 0;
     while(i < n) {
         buffer_[tail_] = buf[i++];
-        tail_ = (tail_ + n) % capacity_;
+        tail_ = (tail_ + 1) % capacity_;
     }
     size_ += n;
 
