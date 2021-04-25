@@ -28,13 +28,15 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/app/inc
     ${PROJECT_SOURCE_DIR}/base/inc
     ${PROJECT_SOURCE_DIR}/net/inc
+    ${PROJECT_SOURCE_DIR}/log/inc
 )
 
 # 设置编译类型
 aux_source_directory(${PROJECT_SOURCE_DIR}/app APP_SOURCE)
 aux_source_directory(${PROJECT_SOURCE_DIR}/base BASE_SOURCE)
 aux_source_directory(${PROJECT_SOURCE_DIR}/net NET_SOURCE)
-add_executable(${BINARY_NAME} ${APP_SOURCE} ${BASE_SOURCE} ${NET_SOURCE})
+aux_source_directory(${PROJECT_SOURCE_DIR}/log LOG_SOURCE)
+add_executable(${BINARY_NAME} ${APP_SOURCE} ${BASE_SOURCE} ${NET_SOURCE} ${LOG_SOURCE})
 
 # 设置编译和链接的一些flag
 # 添加pthread支持
@@ -45,4 +47,4 @@ set_target_properties(${BINARY_NAME} PROPERTIES
 
 # 打印信息
 message("PROJECT_SOURCE_DIR: " ${PROJECT_SOURCE_DIR})
-message("Sources: " ${APP_SOURCE} ${BASE_SOURCE} ${NET_SOURCE})
+message("Sources: " ${APP_SOURCE} ${BASE_SOURCE} ${NET_SOURCE} ${LOG_SOURCE})
