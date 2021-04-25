@@ -11,6 +11,8 @@ Logger::Logger(LogLevel level, int bufferSize)
     : thread_(new Thread(std::bind(&Logger::ThreadFunc, this), "LoggingThread"))
     , level_(level)
     , running_(false)
+    , fd_(STDOUT_FILENO)
+    , closeFd_(false)
     , currentBuffer_(new Buffer(bufferSize))
     , nextBuffer_(new Buffer(bufferSize))
     , buffers_()
@@ -23,10 +25,38 @@ Logger::Logger(LogLevel level, int bufferSize)
     latch_.wait();
 }
 
+Logger::Logger(const std::string & filename, LogLevel level, int bufferSize)
+    : thread_(new Thread(std::bind(&Logger::ThreadFunc, this), "LoggingThread"))
+    , level_(level)
+    , running_(false)
+    , closeFd_(true)
+    , currentBuffer_(new Buffer(bufferSize))
+    , nextBuffer_(new Buffer(bufferSize))
+    , buffers_()
+    , bufferSize_(bufferSize)
+    , mutex_()
+    , cond_(mutex_)
+    , latch_(1) {
+    fd_ = open(filename.c_str(), O_CREAT | O_APPEND | O_WRONLY, 0644);
+    if(fd_ == -1) {
+        throw std::runtime_error("couldn't open log file!");
+    }
+
+    buffers_.reserve(16);
+    thread_->start();
+    latch_.wait();
+}
+
 Logger::~Logger() {
     running_ = false;
     cond_.notify();
     thread_->join();
+    if(closeFd_) {
+        int ret = ::close(fd_);
+        if(ret == -1) {
+            abort();
+        }
+    }
 }
 
 void Logger::log(LogLevel level, const char * format, ...) {
@@ -36,14 +66,16 @@ void Logger::log(LogLevel level, const char * format, ...) {
     
     va_list ap;
     va_start(ap, format);
-    int len = snprintf(buf_, sizeof(buf_), "[%s][%d][%s]\t", logLevelName_[static_cast<int>(level)], CurrentThread::tid(), CurrentThread::name());
+    int len = snprintf(buf_, sizeof(buf_), "[%s][%d][%s] ",
+        logLevelName_[static_cast<int>(level)],
+        CurrentThread::tid(),
+        CurrentThread::name());
     len += vsnprintf(buf_ + len, sizeof(buf_) - len, format, ap);
-    if(len > sizeof(buf_) - 3) {
-        len = sizeof(buf_) - 3;
+    if(len > sizeof(buf_) - 2) {
+        len = sizeof(buf_) - 2;
     }
     buf_[len++] = '\r';
     buf_[len++] = '\n';
-    buf_[len++] = '\0';
     log(buf_, len);
     va_end(ap);
 }
@@ -86,7 +118,7 @@ void Logger::ThreadFunc() {
         for(int i = 0; i < n; ++i) {
             while(!buffers[i]->empty()) {
                 int len = buffers[i]->continuousSize();
-                int ret = write(STDOUT_FILENO, buffers[i]->readBegin(), len);
+                int ret = write(fd_, buffers[i]->readBegin(), len);
                 if(ret == -1) {
                     if(errno != EAGAIN) {
                         throw std::runtime_error("couldn't write some bytes to STDOUT_FILENO");
@@ -98,7 +130,7 @@ void Logger::ThreadFunc() {
         }
         while(!curBuffer->empty()) {
             int len = curBuffer->continuousSize();
-            int ret = write(STDOUT_FILENO, curBuffer->readBegin(), len);
+            int ret = write(fd_, curBuffer->readBegin(), len);
             if(ret == -1) {
                 if(errno != EAGAIN) {
                     throw std::runtime_error("couldn't write some bytes to STDOUT_FILENO");
@@ -129,7 +161,7 @@ void Logger::ThreadFunc() {
     for(int i = 0; i < n; ++i) {
         while(!buffers[i]->empty()) {
             int len = buffers[i]->continuousSize();
-            int ret = write(STDOUT_FILENO, buffers[i]->readBegin(), len);
+            int ret = write(fd_, buffers[i]->readBegin(), len);
             if(ret == -1) {
                 if(errno != EAGAIN) {
                     throw std::runtime_error("couldn't write some bytes to STDOUT_FILENO");
@@ -141,7 +173,7 @@ void Logger::ThreadFunc() {
     }
     while(!curBuffer->empty()) {
         int len = curBuffer->continuousSize();
-        int ret = write(STDOUT_FILENO, curBuffer->readBegin(), len);
+        int ret = write(fd_, curBuffer->readBegin(), len);
         if(ret == -1) {
             if(errno != EAGAIN) {
                 throw std::runtime_error("couldn't write some bytes to STDOUT_FILENO");
@@ -165,7 +197,7 @@ Logger::LoggerPtr Logger::getLogger() {
         MutexLockGuard lock(mutexCreate_);
         p = logger_.lock();
         if(!p) {
-            p.reset(new Logger(DEBUG, 2048));
+            p.reset(new Logger("tinyserver.log", DEBUG, 8192));
             logger_ = p;
         }
     }

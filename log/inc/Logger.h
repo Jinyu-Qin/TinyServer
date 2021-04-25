@@ -31,11 +31,15 @@ public:
 
 private:
     explicit Logger(LogLevel level = DEBUG, int bufferSize = 16384);
+    explicit Logger(const std::string & filename, LogLevel level = DEBUG, int bufferSize = 16384);
     void ThreadFunc();
     void log(const char * msg, int len);
 
     ThreadPtr thread_;
     bool running_;
+
+    int fd_;
+    bool closeFd_;
 
     LogLevel level_;
 
