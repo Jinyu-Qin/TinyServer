@@ -3,6 +3,7 @@
 
 #include <boost/utility.hpp>
 #include "TcpServer.h"
+#include "Logger.h"
 
 class EchoServer: public boost::noncopyable {
     using TcpServerPtr = std::unique_ptr<TcpServer>;
@@ -23,6 +24,7 @@ private:
 
     EventLoop * loop_;
     TcpServerPtr tcpServer_;
+    Logger::LoggerPtr logger_;
 };
 
 #endif //__ECHOSERVER_H__
