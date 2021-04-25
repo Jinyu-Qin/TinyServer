@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <cstdio>
 #include <cstdarg>
+#include "CurrentThread.h"
 
 Logger::Logger(LogLevel level, int bufferSize)
     : thread_(new Thread(std::bind(&Logger::ThreadFunc, this), "LoggingThread"))
@@ -35,7 +36,7 @@ void Logger::log(LogLevel level, const char * format, ...) {
     
     va_list ap;
     va_start(ap, format);
-    int len = snprintf(buf_, sizeof(buf_), "[%s] ", logLevelName_[static_cast<int>(level)]);
+    int len = snprintf(buf_, sizeof(buf_), "[%s][%d][%s]\t", logLevelName_[static_cast<int>(level)], CurrentThread::tid(), CurrentThread::name());
     len += vsnprintf(buf_ + len, sizeof(buf_) - len, format, ap);
     if(len > sizeof(buf_) - 3) {
         len = sizeof(buf_) - 3;
