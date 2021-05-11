@@ -2,13 +2,18 @@
 #include <string>
 #include <glog/logging.h>
 
-static void initGlog(const char * name) {
-    google::InitGoogleLogging(name);
-    FLAGS_log_dir = "./log";
-}
+class GoogleLoggingInitializer {
+public:
+    GoogleLoggingInitializer() {
+        // FIXME 这里改成动态获取程序名
+        google::InitGoogleLogging("tinyserver");
+        FLAGS_log_dir = "./log";
+    }
+};
+
+GoogleLoggingInitializer glogInit;
 
 int main(int argc, char * argv[]) {
-    initGlog(argv[0]);
     
     return 0;
 }
