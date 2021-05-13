@@ -144,7 +144,7 @@ void EventLoop::assertInLoopThread() const {
 }
 
 bool EventLoop::isInLoopThread() const {
-    assert(CurrentThread::tid() == threadId_);
+    return CurrentThread::tid() == threadId_;
 }
 
 void EventLoop::handleWakeUp() {
