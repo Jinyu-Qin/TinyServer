@@ -40,6 +40,10 @@ InetAddress::operator std::string() const {
     return s;
 }
 
+InetAddress::operator struct sockaddr_in() const {
+    return addr_;
+}
+
 std::ostream & operator<<(std::ostream & os, const InetAddress & addr) {
     os << static_cast<std::string>(addr);
     return os;

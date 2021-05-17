@@ -50,7 +50,11 @@ Buffer::size_type Buffer::readIntoFd(int fd, size_type size) {
     assert(size >= -1);
     assert(readableSize() >= size);
 
-    return ::write(fd, readBegin(), size == -1 ? readableSize() : size);
+    size_type nBytes = ::write(fd, readBegin(), size == -1 ? readableSize() : size);
+    if(nBytes > 0) {
+        hasRead(nBytes);
+    }
+    return nBytes;
 }
 
 Buffer::size_type Buffer::writeFromFd(int fd, size_type size) {

@@ -21,6 +21,8 @@ public:
     uint16_t port() const;
     // 转换为"ip:port"形式的字符串
     operator std::string() const;
+    // 转换为sockaddr_in结构体
+    operator struct sockaddr_in() const;
 
 private:
     struct sockaddr_in addr_;
