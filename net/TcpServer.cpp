@@ -68,7 +68,7 @@ void TcpServer::setWriteCompleteCallback(WriteCompleteCallback callback) {
 
 void TcpServer::handleNewConnection(int sockfd, const InetAddress & peerAddr) {
     std::string connName = name_ + "#" + std::to_string(nextConnId_) + " [" + static_cast<std::string>(peerAddr) + "]";
-    TcpConnectionPtr conn = std::make_shared<TcpConnection>(threadPool_->getNextLoop(), sockfd, localAddr_, peerAddr);
+    TcpConnectionPtr conn = std::make_shared<TcpConnection>(threadPool_->getNextLoop(), connName, sockfd, localAddr_, peerAddr);
     ++nextConnId_;
 
     connections_.insert({std::move(connName), conn});
