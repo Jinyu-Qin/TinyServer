@@ -68,7 +68,7 @@ private:
 
     bool started_;
     int nextConnId_;
-    std::unordered_map<std::string, TcpConnectionPtr> connections_;
+    std::unordered_map<uint64_t, TcpConnectionPtr> connections_;
 };
 
 

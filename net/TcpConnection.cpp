@@ -52,6 +52,10 @@ const InetAddress & TcpConnection::peerAddress() const {
     return peerAddr_;
 }
 
+uint64_t TcpConnection::hashCode() const {
+    return reinterpret_cast<uint64_t>(this);
+}
+
 bool TcpConnection::connected() const {
     return state_ == kConnected;
 }

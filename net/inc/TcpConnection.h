@@ -34,6 +34,8 @@ public:
     const InetAddress & localAddress() const;
     // 获取对端地址
     const InetAddress & peerAddress() const;
+    // 获取hash值
+    uint64_t hashCode() const;
     // 是否已建立连接
     bool connected() const;
     // 是否已断开连接

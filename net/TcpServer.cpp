@@ -71,7 +71,7 @@ void TcpServer::handleNewConnection(int sockfd, const InetAddress & peerAddr) {
     TcpConnectionPtr conn = std::make_shared<TcpConnection>(threadPool_->getNextLoop(), connName, sockfd, localAddr_, peerAddr);
     ++nextConnId_;
 
-    connections_.insert({std::move(connName), conn});
+    connections_.insert({conn->hashCode(), conn});
 
     conn->setConnectionCallback(connectionCallback_);
     conn->setMessageCallback(messageCallback_);
@@ -92,7 +92,7 @@ void TcpServer::handleRemoveConnection(TcpConnectionPtr conn) {
 void TcpServer::removeConnectionInLoop(TcpConnectionPtr conn) {
     loop_->assertInLoopThread();
 
-    connections_.erase(conn->name());
+    connections_.erase(conn->hashCode());
     conn->getLoop()->runInLoop(std::bind(&TcpConnection::connectDestroyed, conn));
 
     DLOG(INFO) << "Connection removed [name = " << conn->name()
