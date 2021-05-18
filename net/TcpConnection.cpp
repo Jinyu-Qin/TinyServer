@@ -78,6 +78,7 @@ void TcpConnection::send(const void * message, size_t size) {
 }
 
 void TcpConnection::send(BufferPtr message) {
+    // FIXME what happened if message point to outputBuffer_?
     Buffer::size_type readableSize = message->readableSize();
     send(message->readBegin(), readableSize);
     message->hasRead(readableSize);
