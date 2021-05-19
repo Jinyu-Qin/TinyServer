@@ -44,7 +44,9 @@ TimeStamp EpollPoller::poll(int timeoutMs, ChannelList & activeChannels) {
     } else if(numEvents == 0) {
         DLOG(INFO) << "Epoll timeout after " << timeoutMs << " ms";
     } else {
-        LOG(FATAL) << "Something wrong when call epoll_wait(), the errno is " << errno << "(" << strerror(errno) << ")";
+        if(errno != EINTR) {
+            LOG(FATAL) << "Something wrong when call epoll_wait(), the errno is " << errno << "(" << strerror(errno) << ")";
+        }
     }
 
     return now;
