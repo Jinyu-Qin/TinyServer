@@ -6,6 +6,7 @@
 #include "EventLoop.h"
 #include "EchoServer.h"
 #include "InetAddress.h"
+#include "HttpServer.h"
 
 EventLoop * mainLoop = nullptr;
 
@@ -13,11 +14,11 @@ int main(int argc, char * argv[]) {
     EventLoop loop;
     mainLoop = &loop;
 
-    EchoServer echoServer(mainLoop, "EchoServer", InetAddress("0.0.0.0", 2222));
-    echoServer.start();
+    HttpServer httpServer(mainLoop, "HttpServer", InetAddress("0.0.0.0", 2222), "/home/qinjinyu/workspace/TinyServer/www");
+    httpServer.start();
     mainLoop->loop();
 
-    std::cout << echoServer.name() << " exited!" << std::endl;
+    std::cout << httpServer.name() << " exited!" << std::endl;
     return 0;
 }
 
