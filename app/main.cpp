@@ -18,7 +18,6 @@ int main(int argc, char * argv[]) {
     httpServer.start();
     mainLoop->loop();
 
-    std::cout << httpServer.name() << " exited!" << std::endl;
     return 0;
 }
 
@@ -48,5 +47,21 @@ private:
     }
 };
 
+class PipeSignalInitializer {
+public:
+    PipeSignalInitializer() {
+        signal(SIGPIPE, SIG_IGN);
+    }
+};
+
+class DaemonInitializer {
+public:
+    DaemonInitializer() {
+        daemon(1, 0);
+    }
+};
+
 GoogleLoggingInitializer glogInit;
 InterruptSignalInitializer intSignalInit;
+PipeSignalInitializer pipeSignalInit;
+DaemonInitializer daemonInit;
