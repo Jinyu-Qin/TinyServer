@@ -22,9 +22,9 @@ class HttpServer: public boost::noncopyable {
 public:
     using TcpConnectionPtr  = std::shared_ptr<TcpConnection>;
     using BufferPtr         = Buffer *;
-    using HttpContextPtr    = std::shared_ptr<HttpContext>;
     using HttpRequestPtr    = std::shared_ptr<HttpRequest>;
     using HttpResponsePtr   = std::shared_ptr<HttpResponse>;
+    using HttpContextPtr    = HttpContext *;
 
     HttpServer(EventLoop * loop, const std::string & name, const InetAddress & localAddr, const std::string & root);
     ~HttpServer();
@@ -50,7 +50,6 @@ private:
     std::unique_ptr<TcpServer> tcpServer_;
 
     MutexLock mutex_;
-    std::unordered_map<uint64_t, HttpContextPtr> contexts_;
 };
 
 #endif //__HTTPSERVER_H__

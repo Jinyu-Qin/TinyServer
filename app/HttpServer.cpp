@@ -54,30 +54,16 @@ void HttpServer::stop() {
 
 void HttpServer::handleConnection(TcpConnectionPtr conn) {
     if(conn->connected()) {
-        // FIXME unsafe
-        auto it = contexts_.find(conn->hashCode());
-        assert(it == contexts_.cend());
-
-        HttpContextPtr context(std::make_shared<HttpContext>(conn));
+        HttpContextPtr context = new HttpContext(conn);
         context->setServiceCallback(std::bind(&HttpService::service, service_.get(), std::placeholders::_1, std::placeholders::_2));
-
-        MutexLockGuard lock(mutex_);
-        contexts_.insert({conn->hashCode(), context});
+        conn->setContext(context);
     } else if(conn->disconnected()) {
-        // FIXME unsafe
-        auto it = contexts_.find(conn->hashCode());
-        assert(it != contexts_.cend());
-
-        MutexLockGuard lock(mutex_);
-        contexts_.erase(conn->hashCode());
+        HttpContextPtr context = *boost::any_cast<HttpContextPtr>(&conn->getContext());
+        delete context;
     }
 }
 
 void HttpServer::handleMessage(TcpConnectionPtr conn, BufferPtr message, TimeStamp receiveTime) {
-    // FIXME unsafe
-    auto it = contexts_.find(conn->hashCode());
-    assert(it != contexts_.cend());
-
-    HttpContextPtr context(it->second);
+    HttpContextPtr context = *boost::any_cast<HttpContextPtr>(&conn->getContext());
     context->process(message, receiveTime);
 }

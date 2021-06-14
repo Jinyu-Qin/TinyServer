@@ -2,6 +2,7 @@
 #define __TCPCONNECTION_H__
 
 #include <boost/utility.hpp>
+#include <boost/any.hpp>
 #include <memory>
 #include <string>
 #include <functional>
@@ -72,6 +73,11 @@ public:
     // 连接断开时调用（仅供TcpServer调用一次）
     void connectDestroyed();
 
+    // 设置TCP连接的上下文
+    void setContext(const boost::any & context);
+    // 获取TCP连接的上下文
+    boost::any & getContext();
+
 private:
     enum TcpConnectionState {
         kConnecting,
@@ -111,6 +117,8 @@ private:
 
     Buffer inputBuffer_;                // 接收缓冲
     Buffer outputBuffer_;               // 发送缓冲
+
+    boost::any context_;                // TCP连接的上下文对象（留给应用层使用）
 
     static const std::string stateStr[];
 };

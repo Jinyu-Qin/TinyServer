@@ -163,6 +163,14 @@ void TcpConnection::connectDestroyed() {
     channel_->remove();
 }
 
+void TcpConnection::setContext(const boost::any & context) {
+    context_ = context;
+}
+
+boost::any & TcpConnection::getContext() {
+    return context_;
+}
+
 void TcpConnection::handleRead(TimeStamp receiveTime) {
     loop_->assertInLoopThread();
 
