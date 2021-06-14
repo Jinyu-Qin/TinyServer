@@ -3,6 +3,7 @@
 #include "EventLoop.h"
 #include "InetAddress.h"
 #include "Channel.h"
+#include "TimeStamp.h"
 #include <sys/socket.h>
 #include <glog/logging.h>
 #include <errno.h>
