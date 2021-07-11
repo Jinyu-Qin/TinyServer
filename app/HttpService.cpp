@@ -130,7 +130,7 @@ HttpService::HttpResponsePtr HttpService::executeCgi(HttpRequestPtr request) {
             putenv(queryEnv);
         } else if(request->method() == HttpMethod::kPost) {
             char contentLengthEnv[128];
-            sprintf(contentLengthEnv, "CONTENT_LENGTH=%d", request->getHeader("Content-Length"));
+            sprintf(contentLengthEnv, "CONTENT_LENGTH=%s", request->getHeader("Content-Length").c_str());
             putenv(contentLengthEnv);
         }
 

@@ -364,10 +364,10 @@ HttpContext::HttpResponsePtr HttpContext::generalResponse(HttpStatusCode statusC
     response->setStatusCode(statusCode);
     response->setHeader("Content-Type", "text/html;charset=utf-8");
     // FIXME 改为动态获取程序名和版本号
-    response->setHeader("Server", "tinyserver/1.1.0");
+    response->setHeader("Server", "tinyserver/1.2.1");
 
     std::string msg(std::to_string(static_cast<int>(response->statusCode())) + " " + response->statusMessage());
-    response->setBody("<html><head><title>" + msg + "</title></head><body><center><h1>" + msg + "</h1></center><hr><center>tinyserver/1.1.0</center></body></html>");
+    response->setBody("<html><head><title>" + msg + "</title></head><body><center><h1>" + msg + "</h1></center><hr><center>tinyserver/1.2.1</center></body></html>");
 
     response->setHeader("Content-Length", std::to_string(response->body().size()));
     // FIXME close or keep-alive?
@@ -386,9 +386,9 @@ HttpContext::HttpResponsePtr HttpContext::simpleResponse(HttpVersion version, Ht
     response->setStatusCode(statusCode);
     response->setHeader("Content-Type", "text/html;charset=utf-8");
     // FIXME 改为动态获取程序名和版本号
-    response->setHeader("Server", "tinyserver/1.1.0");
+    response->setHeader("Server", "tinyserver/1.2.1");
 
-    response->setBody("<html><head><title>" + title + "</title></head><body><p>" + content + "</p><hr><center>tinyserver/1.1.0</center></body></html>");
+    response->setBody("<html><head><title>" + title + "</title></head><body><p>" + content + "</p><hr><center>tinyserver/1.2.1</center></body></html>");
 
     response->setHeader("Content-Length", std::to_string(response->body().size()));
 
