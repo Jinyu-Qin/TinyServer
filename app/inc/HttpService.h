@@ -26,6 +26,8 @@ private:
     void doGet(HttpRequestPtr request, HttpResponsePtr response);
     void doPost(HttpRequestPtr request, HttpResponsePtr response);
 
+    HttpResponsePtr executeCgi(HttpRequestPtr request);
+
     const std::string root_;
 };
 
