@@ -29,35 +29,38 @@ void HttpService::service(HttpRequestPtr request, HttpResponsePtr response) {
 }
 
 void HttpService::doGet(HttpRequestPtr request, HttpResponsePtr response) {
-    // 计算文件地址
-    std::string realPath((root_.back() == '/' ? root_.substr(0, root_.size()) : root_) + request->path());
-    DLOG(INFO) << "Real Path: " << realpath;
-
     HttpResponsePtr resp;
-    int fd = ::open(realPath.c_str(), O_RDONLY);
-    if(fd == -1) {
-        if(errno == EACCES) {
-            resp = HttpContext::generalResponse(HttpStatusCode::kForbidden);
-        } else if(errno == ENOENT) {
-            resp = HttpContext::generalResponse(HttpStatusCode::kNotFound);
-        } else {
-            resp = HttpContext::generalResponse(HttpStatusCode::kInternalServerError);
-        }
+    if(request->path() == "/test") {
+        resp = HttpContext::generalResponse(HttpStatusCode::kOk);
     } else {
-        struct stat st;
-        bzero(&st, sizeof(st));
-        stat(realPath.c_str(), &st);
-        std::vector<char> msg;
-        msg.resize(st.st_size);
-
-        if(st.st_mode & S_IXUSR) {
-            resp = executeCgi(request);
-        } else {
-            ssize_t nBytes = ::read(fd, msg.data(), msg.size());
-            if(nBytes == -1) {
-                resp = HttpContext::generalResponse(HttpStatusCode::kInternalServerError);
+        // 计算文件地址
+        std::string realPath((root_.back() == '/' ? root_.substr(0, root_.size() - 1) : root_) + request->path());
+        DLOG(INFO) << "Real Path: " << realpath;
+        int fd = ::open(realPath.c_str(), O_RDONLY);
+        if(fd == -1) {
+            if(errno == EACCES) {
+                resp = HttpContext::generalResponse(HttpStatusCode::kForbidden);
+            } else if(errno == ENOENT) {
+                resp = HttpContext::generalResponse(HttpStatusCode::kNotFound);
             } else {
-                resp = HttpContext::simpleResponse(request->version(), HttpStatusCode::kOk, request->path(), std::string(msg.data(), nBytes));
+                resp = HttpContext::generalResponse(HttpStatusCode::kInternalServerError);
+            }
+        } else {
+            struct stat st;
+            bzero(&st, sizeof(st));
+            stat(realPath.c_str(), &st);
+            std::vector<char> msg;
+            msg.resize(st.st_size);
+
+            if(st.st_mode & S_IXUSR) {
+                resp = executeCgi(request);
+            } else {
+                ssize_t nBytes = ::read(fd, msg.data(), msg.size());
+                if(nBytes == -1) {
+                    resp = HttpContext::generalResponse(HttpStatusCode::kInternalServerError);
+                } else {
+                    resp = HttpContext::simpleResponse(request->version(), HttpStatusCode::kOk, request->path(), std::string(msg.data(), nBytes));
+                }
             }
         }
     }
@@ -76,8 +79,8 @@ void HttpService::doGet(HttpRequestPtr request, HttpResponsePtr response) {
 
 void HttpService::doPost(HttpRequestPtr request, HttpResponsePtr response) {// 计算文件地址
     HttpResponsePtr resp;
-
-    std::string realPath((root_.back() == '/' ? root_.substr(0, root_.size()) : root_) + request->path());
+    
+    std::string realPath((root_.back() == '/' ? root_.substr(0, root_.size() - 1) : root_) + request->path());
     struct stat st;
     bzero(&st, sizeof(st));
     if(stat(realPath.c_str(), &st) == -1) {
@@ -101,7 +104,7 @@ void HttpService::doPost(HttpRequestPtr request, HttpResponsePtr response) {// �
 }
 
 HttpService::HttpResponsePtr HttpService::executeCgi(HttpRequestPtr request) {
-    std::string realPath((root_.back() == '/' ? root_.substr(0, root_.size()) : root_) + request->path());
+    std::string realPath((root_.back() == '/' ? root_.substr(0, root_.size() - 1) : root_) + request->path());
     int cgiInput[2] = {};
     int cgiOutput[2] = {};
     pipe(cgiInput);
