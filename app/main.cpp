@@ -14,7 +14,7 @@ int main(int argc, char * argv[]) {
     EventLoop loop;
     mainLoop = &loop;
 
-    HttpServer httpServer(mainLoop, "HttpServer", InetAddress("0.0.0.0", 2222), "/home/qinjinyu/workspace/TinyServer/www");
+    HttpServer httpServer(mainLoop, "HttpServer", InetAddress("0.0.0.0", 2222), "./www");
     httpServer.start();
     mainLoop->loop();
 

@@ -4,6 +4,7 @@
 #include <glog/logging.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <strings.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -163,6 +164,7 @@ HttpService::HttpResponsePtr HttpService::executeCgi(HttpRequestPtr request) {
 
         close(cgiInput[1]);
         close(cgiOutput[0]);
+        wait(nullptr);
         return HttpContext::simpleResponse(HttpVersion::kHttp11, HttpStatusCode::kOk, request->path(), msg);
     }
 
